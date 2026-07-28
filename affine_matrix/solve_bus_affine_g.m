@@ -1,5 +1,5 @@
 function r = solve_bus_affine_g(o)
-%SOLVE_PIMA_BUS_AFFINE_G PIMA bus-state and generator redispatch matrices.
+%SOLVE_BUS_AFFINE_G PIMA bus-state and generator redispatch matrices.
 %
 % Each bus has one independent signed uncertainty in [-radius,+radius].
 % Its P/Q net injections change together. Output columns are [lower bus 1..N, upper bus 1..N].
