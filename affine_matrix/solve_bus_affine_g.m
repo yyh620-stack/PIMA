@@ -2,11 +2,8 @@ function r = solve_bus_affine_g(o)
 %SOLVE_PIMA_BUS_AFFINE_G PIMA bus-state and generator redispatch matrices.
 %
 % Each bus has one independent signed uncertainty in [-radius,+radius].
-% Its P/Q net injections change together. Output columns are
-% [lower bus 1..N, upper bus 1..N]. Requires MATPOWER, YALMIP, and Gurobi.
+% Its P/Q net injections change together. Output columns are [lower bus 1..N, upper bus 1..N].
 %
-%   r = solve_pima_bus_affine_g;
-%   r = solve_pima_bus_affine_g(radius=0.15, w_pg=1, w_vm=100);
 
 arguments
     o.case_name (1,1) string = "case118"
