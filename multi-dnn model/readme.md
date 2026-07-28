@@ -1,4 +1,4 @@
-运行命令：python COPF/main.py --data case118_n1_per_branch_N140.mat --training-mode partitioned --contingency scalar --epochs 200 --device cuda --out-dir runs/case118_partitioned  
+运行命令：python multi-dnn model/main.py --data case118_n1_per_branch_N140.mat --training-mode partitioned --contingency scalar --epochs 200 --device cuda --out-dir runs/case118_partitioned  
 --case 可选case118和case300  
 使用不同算例或分组方式要提供对应的--cluster-file，分组配置入口：COPF/case118_clusters.json  
 --date 提供训练数据.mat文件（当前训练数据case118_n1_per_branch_N140.mat包含26,040 条样本（20,832条训练；5,208条测试）186 种支路 N-1 故障）  
