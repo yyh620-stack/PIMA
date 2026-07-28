@@ -94,6 +94,11 @@ def _generation_cost(pg: np.ndarray, gencost: np.ndarray) -> np.ndarray:
     return costs
 
 
+def _paper_delta(errors: np.ndarray, nbus: int) -> float:
+    """Average the paper's per-sample L2 error divided by system bus count."""
+    return float(np.mean(np.sqrt(np.sum(errors**2, axis=1)) / nbus))
+
+
 def evaluate_metrics(
     model: nn.Module,
     loader: DataLoader,
@@ -126,6 +131,7 @@ def evaluate_metrics(
     pred_norm = np.concatenate(pred_norm_parts)
     true_norm = np.concatenate(true_norm_parts)
     pred = pred_norm * criterion.y_std.cpu().numpy() + criterion.y_mean.cpu().numpy()
+    true = true_norm * criterion.y_std.cpu().numpy() + criterion.y_mean.cpu().numpy()
     pf_error = np.concatenate(pred_flow_p_parts) - np.concatenate(true_flow_p_parts)
     qf_error = np.concatenate(pred_flow_q_parts) - np.concatenate(true_flow_q_parts)
     metrics: Dict[str, float] = {
@@ -135,8 +141,17 @@ def evaluate_metrics(
     }
     nbus, ngen = criterion.case.nbus, criterion.case.ngen
     vm = pred[:, :nbus]
+    va = pred[:, nbus : 2 * nbus]
     pg = pred[:, 2 * nbus : 2 * nbus + ngen]
     qg = pred[:, 2 * nbus + ngen : 2 * nbus + 2 * ngen]
+    metrics.update({
+        "delta_p_paper_mw": _paper_delta(pg - true[:, 2 * nbus : 2 * nbus + ngen], nbus),
+        "delta_q_paper_mvar": _paper_delta(qg - true[:, 2 * nbus + ngen :], nbus),
+        "delta_v_paper_pu": _paper_delta(vm - true[:, :nbus], nbus),
+        "delta_theta_paper_deg": _paper_delta(
+            np.rad2deg(va - true[:, nbus : 2 * nbus]), nbus
+        ),
+    })
     _violation_metrics(
         metrics, "v", vm, physics.vmin, physics.vmax, 1.0, feasibility_tolerance
     )
@@ -178,6 +193,10 @@ def _validation_quality(metrics: Dict[str, float]) -> float:
 def _reported_metrics(metrics: Dict[str, float]) -> Dict[str, float]:
     """Keep only the feasibility and optimality metrics requested for reports."""
     keys = (
+        "delta_p_paper_mw",
+        "delta_q_paper_mvar",
+        "delta_v_paper_pu",
+        "delta_theta_paper_deg",
         "eta_v_pct",
         "eta_pg_pct",
         "eta_qg_pct",
