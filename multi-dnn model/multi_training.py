@@ -369,6 +369,10 @@ def _constraint_metrics(
         float(np.mean(violation)),
     )
 
+def _paper_delta(errors: np.ndarray, nbus: int) -> float:
+    """Average the paper's per-sample L2 error divided by system bus count."""
+    return float(np.mean(np.sqrt(np.sum(errors**2, axis=1)) / nbus))
+
 
 def _evaluate_partition(
     model: nn.Module,
@@ -630,7 +634,11 @@ def _evaluate_global(
     va = prediction[:, case.nbus : 2 * case.nbus]
     pg = prediction[:, 2 * case.nbus : 2 * case.nbus + case.ngen]
     qg = prediction[:, 2 * case.nbus + case.ngen :]
-
+    true_vm = truth[:, : case.nbus]
+    true_va = truth[:, case.nbus : 2 * case.nbus]
+    true_pg = truth[:, 2 * case.nbus : 2 * case.nbus + case.ngen]
+    true_qg = truth[:, 2 * case.nbus + case.ngen :]
+    
     voltage = vm * np.exp(1j * va)
     vf, vt = voltage[:, physics.fbus], voltage[:, physics.tbus]
     current_f = vf * physics.yff + vt * physics.yft
@@ -670,6 +678,11 @@ def _evaluate_global(
                 np.mean((qg - truth[:, 2 * case.nbus + case.ngen :]) ** 2)
             )
         ),
+        "delta_p_paper_mw": _paper_delta(pg - true_pg, case.nbus),
+        "delta_q_paper_mvar": _paper_delta(qg - true_qg, case.nbus),
+        "delta_v_paper_pu": _paper_delta(vm - true_vm, case.nbus),
+        "delta_theta_paper_deg": _paper_delta(np.rad2deg(va - true_va), case.nbus),
+
         "eta_v_pct": eta_v,
         "eta_pg_pct": eta_pg,
         "eta_qg_pct": eta_qg,
