@@ -1,12 +1,7 @@
 function result = dfs_refine_pima_clusters(o)
 %DFS_REFINE_PIMA_CLUSTERS Make affine clusters connected and balanced.
-%
-%   result = dfs_refine_pima_clusters;
-%   result = dfs_refine_pima_clusters(auto_refine=false);
-%   result = dfs_refine_pima_clusters(cluster_file="bus_clusters.csv");
-%
-% By default, the function reads bus_clusters.csv produced by
-% cluster_buses. Topology is read from the selected MATPOWER case.
+
+% By default, the function reads bus_clusters.csv produced by cluster_buses. Topology is read from the selected MATPOWER case.
 
 arguments
     o.case_name (1,1) string = "case118"
